@@ -1,3 +1,8 @@
+Aquest programa consisteix en omplir una matriu amb els nombres primers ordenats de petit
+a gran. La longitud d'aquesta matriu serà del mateix valor que el paràmetre que introdueix
+l'usuari a l'hora de cridar el programa.
+
+
 import sys
 
 class llista_primers:
