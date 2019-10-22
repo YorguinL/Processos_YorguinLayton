@@ -1,7 +1,9 @@
-Aquest programa consisteix en omplir una matriu amb els nombres primers ordenats de petit
-a gran. La longitud d'aquesta matriu serà del mateix valor que el paràmetre que introdueix
-l'usuari a l'hora de cridar el programa.
+#Aquest programa consisteix en omplir una matriu amb els nombres primers ordenats de petit
+#a gran. La longitud d'aquesta matriu serà del mateix valor que el paràmetre que introdueix
+#l'usuari a l'hora de cridar el programa.
 
+#Ex: python nomPrograma.py 5
+#Per tant, el que ens retornarà és la següent matriu: [2, 3, 5, 7, 11]
 
 import sys
 
