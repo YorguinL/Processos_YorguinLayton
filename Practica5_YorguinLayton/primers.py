@@ -38,6 +38,6 @@ class llista_primers:
 
 
 if __name__ == '__main__':
-    #Executa el codi quan no és cridat des d'un altre programa.
+    #Executa el codi quan no és cridat des d'un altre programa
     l = llista_primers(int(sys.argv[1]))
     print l.llista
