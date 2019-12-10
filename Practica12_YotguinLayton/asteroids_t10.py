@@ -7,7 +7,7 @@ from pygame.locals import *
 
 import random, time
 from datetime import datetime
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Semaphore
 from threading import Thread
 
 class World(object):
@@ -16,6 +16,7 @@ class World(object):
     RENDER_OPTIONS = HWSURFACE | DOUBLEBUF | RESIZABLE
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
+    RED = (255, 0, 0)
 
     def __init__(self, size, player):
         # setting up the screen
@@ -93,8 +94,8 @@ class World(object):
         elif(event.key == K_SPACE):
             posBullet = (Vector(*world.player.rect.center)-world.player.facing*2).to_position()
             bullet = Bullet(posBullet, self.player.facing.to_degrees()[0]+180, self.player.motion.magnitude()+10)
-            world.sprites.add(bullet)  
-            
+            world.sprites.add(bullet)
+
 
 class Vector(object):
 
@@ -232,10 +233,13 @@ class Asteroid(Entity):
         if self.duration <= 0:
             self.kill()
 
+
+
 def update_s():
     #print "entra"
     i = 0
     while world.running:
+        s.acquire()
         if i == 10 and len([x for x in world.sprites if isinstance(x, Asteroid)]) < 30:
             asteroid = Asteroid((random.randint(0, 800), random.randint(0,600)))
             world.sprites.add(asteroid)
@@ -244,16 +248,38 @@ def update_s():
         world.update()
         world.render()
         pygame.display.flip()
+        s.release()
         clock.tick(40)
     #print 'acaba'
     return 0
 
-def collision_bullet():
+s = Semaphore()
 
-    for i in world.sprites if isinstance(i, Asteroid):
-        for i in world.sprites if isinstance(i, Bullet):
-            abs()
-    
+def update_c():
+    while world.running:
+        s.acquire()
+        collision_bullet()
+        collision_player()
+        s.release()
+        clock.tick(40)
+
+
+def collision_bullet():
+    for i in [x for x in world.sprites if isinstance(x, Asteroid)]:
+        for j in [y for y in world.sprites if isinstance(y, Bullet)]:
+            if(abs(i.rect.center[0] - j.rect.center[0]) < 20 and abs(i.rect.center[1] - j.rect.center[1]) < 20):
+                i.kill()
+                j.kill()
+
+
+def collision_player():
+    for i in [x for x in world.sprites if isinstance(x, Asteroid)]:
+        if (abs(i.rect.center[0] - player.rect.center[0]) < 20 and abs(i.rect.center[1] - player.rect.center[1]) < 20):
+            world.running = False
+            world.surface.fill(world.RED)
+            world.render()
+            pygame.display.flip()
+            time.sleep(5)
 
 # setup pygame
 pygame.init()
@@ -280,7 +306,9 @@ def main():
 
     # main loop
     supdate = Thread(target=update_s)
+    cupdate = Thread(target=update_c)
     supdate.start()
+    cupdate.start()
     while world.running:
 
         events = pygame.event.get()
@@ -294,7 +322,7 @@ def main():
             world.handle_event(event)
             world.handle_keydown
             world.handle_keyup
-            
+
 
 
         '''
