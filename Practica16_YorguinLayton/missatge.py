@@ -1,18 +1,15 @@
 
-import socket
-
-s = socket
-
 def enviar_missatge(s):
     while True:
         missatge = raw_input('Introdueix missatge: ')
         s.sendall(missatge)
-        if missatge == "bye":
+        if missatge == 'Bye':
             break
 
 def rebre_missatge(s):
     while True:
-        missatge = s.recv(1024)
-        print (missatge)
-        if missatge == "bye":
+        dades = s.recv(1024)
+        print (dades)
+        if dades == 'Bye':
+            s.sendall(dades)
             break
