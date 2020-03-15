@@ -1,5 +1,6 @@
 import socket, threading
 from ChatFns import HOST, PORT
+from ChatFns import send_img, receive_img
 
 def accept_client():
     while True:
@@ -15,16 +16,22 @@ def accept_client():
 def broadcast_usr(uname, cli_sock):
     while True:
         try:
-            data = cli_sock.recv(1024)
-            if "/image" in data:
-                receive_imag(ser_sock, data)
+            data = cli_sock.recv(4096000)
             if data:
-                print "{0} spoke {1}".format(uname, data)
-                b_usr(cli_sock, uname, data)
-                if data[:-1] == "Bye":
+                if "/image" in data:
+                    img = data.split("/image")[-1]
+                    msg = receive_img(cli_sock, img)
+                    b_usr(cli_sock, uname, msg)
+
+                elif data[:-1] == "Bye":
                     CONNECTION_LIST.remove((uname, cli_sock))
                     cli_sock.close()
                     break
+
+                else:
+                    print "{0} spoke {1}".format(uname, data)
+                    b_usr(cli_sock, uname, data)
+
         except Exception as x:
             print(x.message)
             break
@@ -32,22 +39,12 @@ def broadcast_usr(uname, cli_sock):
 def b_usr(cs_sock, sen_name, msg):
     for client in CONNECTION_LIST:
         if client[1] != cs_sock:
-            client[1].send(sen_name + ':' + msg)
-            #if "/image " in data:
-            #client[1].send(msg)
-            #send(img)
+            if "/image" in msg:
+                send_img(ser_sock, msg)
 
-def receive_imag(s, size):
-    img = open("imgServer.jpg", 'wb')
-    r_size = 0
-    t = s.recv(4096000)
-    d_img = t.split(' ',1)[-1]
-    r_size = len(d_img)
+            else:
+                client[1].send(sen_name + ':' + msg)
 
-    while r_size < size:
-        d_img = d_img + t
-        pass
-    img.write(d_img.decode('base64'))
 
 
 if __name__ == "__main__":
