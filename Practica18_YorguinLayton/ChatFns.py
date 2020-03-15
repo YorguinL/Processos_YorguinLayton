@@ -4,6 +4,8 @@ import urllib
 import re
 import pygame
 import base64
+import time
+import datetime
 #import win32gui
 
 HOST = 'localhost'
@@ -117,11 +119,32 @@ def LoadOtherEntry(ChatLog, EntryText):
             ChatLog.config(state=DISABLED)
             ChatLog.yview(END)
 
-def send_imag(s, path):
-    img = open(path, 'rb')
+def send_img(s, path):
+    ps = path.split("\n")[0]
+    img = open(ps, 'rb')
     data = img.read()
     c_data = data.encode('base64')
     size = len(c_data)
     s.sendall('/image ' + str(size))
     time.sleep(1)
     s.sendall('/image ' + c_data)
+
+def receive_img(s, size):
+    dt = datetime.datetime.now()
+    path = "image_" + str(datetime.date.today())+"_"+str(dt.hour)+":"+str(dt.minute)+":"+str(dt.second)+".jpg"
+    img = open(str(path), 'wb')
+    t = s.recv(4096000)
+    data = t.split(" ",1)[-1]
+    r_size = len(data)
+
+    if r_size == int(size):
+        img.write(data.decode('base64'))
+
+    else:
+        while r_size < int(size):
+            t2 = s.recv(4096000)
+            data += t2
+            r_size += len(t2)
+        img.write(data.decode('base64'))
+    img.close()
+    return "/image " + str(path)
